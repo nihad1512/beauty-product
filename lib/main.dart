@@ -719,31 +719,56 @@ Align(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
     onPressed: () async {
-      await submitToGoogleSheet(
-        product: widget.name,
-        name: _nameController.text,
-        phone: _phoneController.text,
-        size: _selectedSize ?? '',
-        quantity: _quantity,
-        willaya: _willayaController.text,
-        delivery: _deliveryMethod,
-        price: widget.price,
-      );
+  // تحقق من أن كل الحقول معمرة
+  if (_nameController.text.isEmpty ||
+      _phoneController.text.isEmpty ||
+      _willayaController.text.isEmpty ||
+      _selectedSize == null) {
+    // إذا كاين شي ناقص، نعرض رسالة خطأ
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(' Incomplete information'),
+        content: Text('Please fill in all fields before ordering.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Okay'),
+          )
+        ],
+      ),
+    );
+    return; // نوقف التنفيذ
+  }
 
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: Text('Requested Successfully'),
-          content: Text('Thank you for your order! Our team will contact you soon.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Okay'),
-            ),
-          ],
+  // إرسال الطلب
+  await submitToGoogleSheet(
+    product: widget.name,
+    name: _nameController.text,
+    phone: _phoneController.text,
+    size: _selectedSize!,
+    quantity: _quantity,
+    willaya: _willayaController.text,
+    delivery: _deliveryMethod,
+    price: widget.price,
+  );
+
+  // رسالة نجاح
+  showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Text('The request was successful.'),
+      content: Text('Thank you for your order! Our team will contact you soon.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('Okay'),
         ),
-      );
-    },
+      ],
+    ),
+  );
+},
+
     child: Text('Order Now', style: TextStyle(fontSize: 16)),
   ),
 ),
